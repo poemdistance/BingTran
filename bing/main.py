@@ -61,6 +61,7 @@ def main(useShm):
             continue
 
         try:
+            bt.clearFlag()
             soup = bt.getSoup(url, src);
         except Exception as e:
             cprint('   '+str(e))
