@@ -3,22 +3,52 @@ import warnings
 import re
 import urllib
 import sysv_ipc as ipc
+from termcolor import cprint
 from bs4 import BeautifulSoup
 
 class bingTranslator(object):
     def __init__(self):
         self.soup = None
         self.response = None
+
+        self.finish = '0'
+        self.phonetic = '0'
+        self.zhTranNum = '0'
+        self.enTranNum = '0'
+        self.otherWordFormFlag = '0'
+        self.audioNum = '0'
         pass
 
+    def getConcatenateFlag(self):
+
+        self.finish = '1'
+        flag = self.finish + self.phonetic + self.zhTranNum +\
+                self.enTranNum + self.otherWordFormFlag + \
+                self.audioNum
+        
+        return flag
+
+
+    def clearFlag(self):
+
+        self.finish = '0'
+        self.phonetic = '0'
+        self.zhTranNum = '0'
+        self.enTranNum = '0'
+        self.otherWordFormFlag = '0'
+        self.audioNum = '0'
+
+
     def connect_shared_memory (self):
-        if useShm:
-            warnings.simplefilter("ignore")
-            path = "/tmp"
-            projectID = 2333
-            key = ipc.ftok(path, projectID)
-            shm = ipc.SharedMemory(key, 0, 0)
-            shm.attach(0,0)
+
+        warnings.simplefilter("ignore")
+        path = "/tmp"
+        projectID = 2334
+        key = ipc.ftok(path, projectID)
+        shm = ipc.SharedMemory(key, 0, 0)
+        shm.attach(0,0)
+
+        return shm
 
     def getHeaders (self):
 
@@ -57,23 +87,36 @@ class bingTranslator(object):
     def getHeadword(self):
         return self.soup.find('div', { 'class':'hd_div', 'id':'headword' })
 
-    def getPronounciation(self):
+    def getpronunciation(self):
 
         #音标pronociation: 英音 & 美音
-        pronounciationUS = self.soup.find('div', { 'class':'hd_prUS' })
-        pronounciation = self.soup.find('div', { 'class':'hd_pr' })
+        pronunciationUS = self.soup.find('div', { 'class':'hd_prUS' })
+        pronunciation = self.soup.find('div', { 'class':'hd_pr' })
 
-        return pronounciation, pronounciationUS
+        if pronunciation or pronunciationUS:
+            self.phonetic = '1'
+
+        return pronunciation, pronunciationUS
 
     def getPos(self):
         poss = []
         for pos in self.soup.findAll('span', { 'class':'pos' }):
+            pos.string = pos.string.replace('网络', "网络.")
             poss.append(pos.string)
 
         return poss
 
     def getZhTran(self):
-        return self.soup.findAll('span', { 'class':'def' })
+        items = []
+        num = 0
+        for i in self.soup.findAll('span', { 'class':'def' }):
+
+            #不要直接使用.string，否则span里的内容可能无法提取出来
+            items.append(i.text)
+            num = num + 1
+
+        self.zhTranNum = str(num)
+        return items
 
     def getAudioLink(self):
         #语音
@@ -81,6 +124,8 @@ class bingTranslator(object):
         link = []
         for audio in audios:
             link.append(re.search(r'https\:\/\/.+?\.mp3', str(audio)).group(0))
+
+        self.audioNum = str(len(link))
 
         return link
 
@@ -98,6 +143,8 @@ class bingTranslator(object):
             part = s.string.replace('：',': ') + a[i].string
             words.append(part)
 
+        self.otherWordFormFlag = '1' if words != [] else '0'
+
         return words
 
     def getEnTran(self):
@@ -110,7 +157,8 @@ class bingTranslator(object):
 
         pos = []
         data = {}
-        
+        num = 0
+
         for div in divs:
             p = div.find('div', { 'class':'pos pos1' }).string
             pos.append(p)
@@ -128,4 +176,5 @@ class bingTranslator(object):
 
             data[pos[i]] = sentences
 
+        self.enTranNum = str(i+1)
         return pos,data
