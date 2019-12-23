@@ -119,6 +119,7 @@ def main(useShm):
                 if entrans[poss[i]][0]:
                     string += entrans[poss[i]][0] + '|'
                     noEnTran = 0
+                    break;
         except Exception:
             string += '|' if noEnTran else ''
             pass
