@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 from termcolor import colored, cprint
 from bing.BingTran import bingTranslator
 from bing.strctl import formatStr
+import string
 
 if __name__ == "__main__":
     #共享内存使用标识
@@ -31,6 +32,17 @@ def isword(src):
 def doNothing():
     pass
 
+def IsAllPuntuation(src):
+
+    for e in src:
+        if 0 <= ord(e) <= 64 or 91 <= ord(e) \
+                <= 96 or 123 <= ord(e) <= 127:
+           continue
+        else:
+           return False
+
+    return True
+
 
 def main(useShm):
 
@@ -50,6 +62,10 @@ def main(useShm):
                     continue
                 if not isword(src):
                     cprint('    Not a src', 'blue')
+                    continue
+                if IsAllPuntuation(src):
+                    shm.write('101000'+'0000'+src+'||'+src+'|||||') if useShm else doNothing()
+                    cprint('\n   '+src, 'blue', end='\n\n' )
                     continue
             else:
                 src = sys.argv[0]
@@ -119,6 +135,7 @@ def main(useShm):
                 if entrans[poss[i]][0]:
                     string += entrans[poss[i]][0] + '|'
                     noEnTran = 0
+                    break;
         except Exception:
             string += '|' if noEnTran else ''
             pass

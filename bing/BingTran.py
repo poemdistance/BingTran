@@ -157,7 +157,6 @@ class bingTranslator(object):
 
         pos = []
         data = {}
-        num = 0
 
         for div in divs:
             p = div.find('div', { 'class':'pos pos1' }).string
@@ -176,5 +175,5 @@ class bingTranslator(object):
 
             data[pos[i]] = sentences
 
-        self.enTranNum = str(i+1)
+        self.enTranNum = str(1) if len(data) > 0 else str(0)
         return pos,data
