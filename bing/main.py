@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 from termcolor import colored, cprint
 from bing.BingTran import bingTranslator
 from bing.strctl import formatStr
+import string
 
 if __name__ == "__main__":
     #共享内存使用标识
@@ -50,6 +51,10 @@ def main(useShm):
                     continue
                 if not isword(src):
                     cprint('    Not a src', 'blue')
+                    continue
+                if not src.isalpha():
+                    shm.write('101000'+'0000'+src+'||'+src+'|||||') if useShm else doNothing()
+                    cprint('\n   '+src, 'blue', end='\n\n' )
                     continue
             else:
                 src = sys.argv[0]
