@@ -11,6 +11,7 @@ from termcolor import colored, cprint
 from bing.BingTran import bingTranslator
 from bing.strctl import formatStr
 import string
+import signal
 
 if __name__ == "__main__":
     #共享内存使用标识
@@ -43,6 +44,8 @@ def IsAllPuntuation(src):
 
     return True
 
+def exit( signo, frame ):
+    sys.exit(0)
 
 def main(useShm):
 
@@ -50,6 +53,8 @@ def main(useShm):
     actualStart = 10
     bt = bingTranslator();
     shm = bt.connect_shared_memory() if useShm else doNothing()
+
+    signal.signal ( signal.SIGTERM, exit )
 
     while True:
         url = 'https://cn.bing.com/dict/search?q='
@@ -71,6 +76,7 @@ def main(useShm):
                 src = sys.argv[0]
 
         except KeyboardInterrupt as e:
+            cprint( 'Good bye~', 'blue', attrs=['bold'])
             sys.exit(0)
         except Exception as e:
             print(e)
