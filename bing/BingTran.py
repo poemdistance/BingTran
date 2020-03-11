@@ -44,9 +44,13 @@ class bingTranslator(object):
         warnings.simplefilter("ignore")
         path = "/tmp"
         projectID = 2334
-        key = ipc.ftok(path, projectID)
-        shm = ipc.SharedMemory(key, 0, 0)
-        shm.attach(0,0)
+        try:
+            key = ipc.ftok(path, projectID)
+            shm = ipc.SharedMemory(key, 0, 0)
+            shm.attach(0,0)
+        except Exception as e:
+            print('bing 获取共享内存失败'+str(e))
+            sys.exit(1)
 
         return shm
 
