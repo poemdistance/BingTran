@@ -12,6 +12,7 @@ from bing.BingTran import bingTranslator
 from bing.strctl import formatStr
 import string
 import signal
+import setproctitle
 
 if __name__ == "__main__":
     #共享内存使用标识
@@ -48,6 +49,8 @@ def exit( signo, frame ):
     sys.exit(0)
 
 def main(useShm):
+
+    setproctitle.setproctitle("bing: Bing Translation")
 
     global times
     actualStart = 10
